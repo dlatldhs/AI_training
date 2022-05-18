@@ -1,36 +1,61 @@
-from lib2to3.pgen2 import driver
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 import urllib.request
 import os
 
-# variable
-name = '서동현'
-count = 0
-
-driver = webdriver.Chrome('C:/Users/sionz/Desktop/dlxkw/project\public_data\crawling\chromedriver.exe') # need chrome driver path
-driver.get('https://naver.com')
-
-elem = driver.find_element_by_name("q") # google search
-
-elem.send_keys(name)
-elem.send_keys(Keys.RETURN) # ENTER 치는거
-
-# img url 가져오기
-imgs = driver.find_element_by_css_selector(".rg_i.Q4LuWd")
-count = 1
-for img in imgs:
+def createDirectory(directory):
     try:
-        img.click()
-        time.sleep(2)
-        img_url = driver.find_element_by_xpath(
-            '//*[@id="Sva75c"]/div/div/div[3]/div[2]/c-wiz/div/div[1]/div[1]/div[3]/div/a/img'
-        ).get_attribute("src")
-        path = "C:\\Users\\sionz\\Desktop\\dlxkw\\project\\public_data\\crawling\\imgs\\" + name + "\\"
-        urllib.request.urlretrieve(img_url, path + name + str(count + ".jpg"))
-        count = count + 1
-        if count > 260:
-            break
-    except:
-        pass
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print("Error: Failed to create the directory.")
+
+def crawling_img(name):
+    driver = webdriver.Chrome("C:\\Users\\sionz\\Desktop\\dlxkw\\project\\public_data\\crawling\\chromedriver.exe")
+    driver.get("https://www.google.co.kr/imghp?hl=ko&tab=wi&authuser=0&ogbl")
+    elem = driver.find_element_by_name("q")
+    elem.send_keys(name)
+    elem.send_keys(Keys.RETURN)
+
+    #
+    SCROLL_PAUSE_TIME = 1
+    # Get scroll height
+    last_height = driver.execute_script("return document.body.scrollHeight")  # 브라우저의 높이를 자바스크립트로 찾음
+    while True:
+        # Scroll down to bottom
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")  # 브라우저 끝까지 스크롤을 내림
+        # Wait to load page
+        time.sleep(SCROLL_PAUSE_TIME)
+        # Calculate new scroll height and compare with last scroll height
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            try:
+                driver.find_element_by_css_selector(".mye4qd").click()
+            except:
+                break
+        last_height = new_height
+
+    imgs = driver.find_elements_by_css_selector(".rg_i.Q4LuWd")
+    dir = "C:\\Users\\sionz\\Desktop\\dlxkw\\project\\public_data\\crawling\\imgs\\" + name
+
+    createDirectory(dir) #폴더 생성
+    count = 1
+    for img in imgs:
+        try:
+            img.click()
+            time.sleep(2)
+            imgUrl = driver.find_element_by_xpath(
+                '//*[@id="Sva75c"]/div/div/div[3]/div[2]/c-wiz/div/div[1]/div[1]/div[3]/div[1]/a/img').get_attribute(
+                "src")
+            path = "C:\\Users\\sionz\\Desktop\\dlxkw\\project\\public_data\\crawling\\imgs\\" + name + "\\"
+            urllib.request.urlretrieve(imgUrl, path + name + str(count) + ".jpg")
+            count = count + 1
+            if count >= 300:
+                break
+        except:
+            pass
+    driver.close()
+named = ["북극곰"]
+for i in named:
+    crawling_img(i)
