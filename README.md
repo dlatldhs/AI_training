@@ -19,3 +19,25 @@
 특징 추출 영역은 합성곱층(convolution layer)과 풀링층(Pooling layer)을 여러 겹 쌓는 형태(Conv+Maxpool)로 구성되어 있으며
 이미지의 클래스를 분류하는 부분은 Fully connected(FC) 학습 방식으로 이미지를 분류한다.
 ```
+
+#### 회귀분석(Regression test)
+```독립 변수가 종속 변수에 어떤 영향을 끼치는지 알아볼 때 쓰는 방법```<br>
+독립 변수X 와 종속 변수Y 사이의 관계를 그래프로
+``` p
+from sklearn.linear_model import LinearRegression
+LRmodel=LinearRegression()
+LRmodel.fit(X.reshape(-1, 1), Y) # fit()는 X변수를 2차원으로 넣어줘야 함
+# 독립변수가 두 개면 .coef_[0]와 .coef_[1] 두 개가 자동 생성됨
+beta_0 = LRmodel.coef_[0] #기울기
+beta_1 = LRmodel.intercept_ #y절편
+plt.scatter(X, Y)
+pred_Y = beta_0*X+beta_1   # pred_Y = LRmodel.predict(X.reshape(-1, 1))
+plt.plot(X, pred_Y, c='r')
+plt.show( )
+print('beta_0: %.2f' %beta_0)
+print('beta_1: %.2f' %beta_1)
+print('Loss : %.2f' %loss(Y, pred_Y))
+```
+<img src="https://github.com/dlatldhs/AI_training/blob/master/imgs/%ED%9A%8C%EA%B7%80%EB%B6%84%EC%84%9D%EC%98%88%EC%A0%9C.png?raw=true" alt="회귀분석예제" />
+나타낼 수 있다.<br>
+또한 평균적으로 값이 너무 크거나 작은 이상한 값을 볼 수 있어서 일치율을 맞추기에 좋은 방법 중 하나이다.
